@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #ffe9c4;
+        cursor: none;
+        transition: background 0.2s ease;
+      }
+
+      /* Elmo starts hidden and tiny */
+      #elmo {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        transform: translate(-50%, -50%);
+        user-select: none;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.4s ease, transform 0.12s ease;
+      }
+
+      #overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        z-index: 5;
+      }
+
+      #play-button {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 30px 60px;
+        font-size: 32px;
+        background: #ff4b4b;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        z-index: 10;
+      }
+
+      #play-button:hover {
+        background: #ff2a2a;
+      }
+
+      .sparkle {
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        animation: fade 0.8s ease-out forwards;
+        pointer-events: none;
+      }
+
+      @keyframes fade {
+        from {
+          transform: scale(1);
+          opacity: 1;
+        }
+        to {
+          transform: scale(2);
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button id="play-button">PLAY</button>
+
+    <!-- SHORTENED — USE YOUR BASE64 IMAGE -->
+    <img
+      id="elmo"
+      src="data:image/png;base64,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"
+      alt="Elmo"
+    />
+
+    <div id="overlay"></div>
+    <audio
+      id="laugh-sound"
+      src="https://www.myinstants.com/media/sounds/elmo-laughing.mp3"
+    ></audio>
+
+    <script>
+      const elmo = document.getElementById("elmo");
+      const playButton = document.getElementById("play-button");
+      const overlay = document.getElementById("overlay");
+      const laugh = document.getElementById("laugh-sound");
+
+      /* Fullscreen */
+      function goFullscreen() {
+        return (
+          document.body.requestFullscreen?.() ||
+          document.body.webkitRequestFullscreen?.() ||
+          document.body.mozRequestFullScreen?.() ||
+          document.body.msRequestFullscreen?.()
+        );
+      }
+
+      /* Start game */
+      playButton.addEventListener("click", async () => {
+        try {
+          await goFullscreen();
+        } catch (e) {}
+        playButton.style.display = "none";
+        overlay.style.display = "block";
+
+        // Reveal Elmo
+        elmo.style.opacity = "1";
+      });
+
+      /* Follow mouse */
+      document.addEventListener("mousemove", (e) => {
+        if (overlay.style.display !== "block") return;
+
+        elmo.style.left = e.clientX + "px";
+        elmo.style.top = e.clientY + "px";
+
+        // Background color shift
+        const g = 200 + (e.clientX % 55);
+        const b = 150 + (e.clientY % 55);
+        document.body.style.background = `rgb(255,${g},${b})`;
+
+        makeSparkle(e.clientX, e.clientY);
+      });
+
+      function makeSparkle(x, y) {
+        const s = document.createElement("div");
+        s.className = "sparkle";
+        s.style.left = x + "px";
+        s.style.top = y + "px";
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 800);
+      }
+
+      /* Laugh + throttle animation */
+      function laughPulse() {
+        elmo.style.transform = "translate(-50%, -50%) scale(1.8)";
+
+        setTimeout(() => {
+          elmo.style.transform = "translate(-50%, -50%) scale(1)";
+          setTimeout(() => {
+            elmo.style.transform = "translate(-50%, -50%) scale(1.8)";
+            setTimeout(() => {
+              elmo.style.transform = "translate(-50%, -50%) scale(1)";
+              setTimeout(() => {
+                elmo.style.transform = "translate(-50%, -50%) scale(1.8)";
+              }, 120);
+            }, 120);
+          }, 120);
+        }, 120);
+
+        setTimeout(() => {
+          elmo.style.transform = "translate(-50%, -50%) scale(1)";
+        }, 200);
+      }
+
+      overlay.addEventListener("click", () => {
+        laugh.currentTime = 0;
+        laugh.play();
+        laughPulse();
+      });
+
+      overlay.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        laugh.currentTime = 0;
+        laugh.play();
+        laughPulse();
+      });
+    </script>
+  </body>
+</html>
